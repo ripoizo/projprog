@@ -26,12 +26,14 @@ Contact: Guillaume.Huard@imag.fr
 #include <stdlib.h>
 
 struct registers_data {
-	uint32_t registre;
+	uint32_t cpsr; //registre 16
+	uint32_t spsr; //registre 17
+	uint32_t registre[16]; //registres 0 à 15
 };
 
 registers registers_create() {
     registers r;
-    r = malloc(sizeof(registers_data));
+    r = malloc(sizeof(registers));
     return r;
 }
 
@@ -40,16 +42,16 @@ void registers_destroy(registers r) {
 }
 
 uint8_t get_mode(registers r) {
-	uint8_t mode;
-	int i,m;
-	for(i=0,i<7,i++){
+	uint8_t mode,m;
+	int i;
+	for(i=0; i<7; i++){
 		if(i>4){
-			m=get_bit(r,i+4);
+			m=get_bit(r->cpsr,i+4);
 		}
 		else{
-			m=get_bit(r,i);
+			m=get_bit(r->cpsr,i);
 		}
-		set_bit(mode,m);
+		mode=set_bit(m,i);
 	}
     return mode;
 } 
@@ -73,33 +75,45 @@ int in_a_privileged_mode(registers r) {
 }
 
 uint32_t read_register(registers r, uint8_t reg) {
-    uint32_t value=0;
-    return value;
+    if(reg == 00010000){
+    	return r->cpsr;
+    } 
+    else if (reg==00010001){
+    	return r->spsr;
+    }
+    return r->registre[reg];
 }
 
 uint32_t read_usr_register(registers r, uint8_t reg) {
-    uint32_t value=0;
-    return value;
+    return r->registre[reg];
 }
 
 uint32_t read_cpsr(registers r) {
-    uint32_t value=0;
-    return value;
+    return r->cpsr;
 }
 
 uint32_t read_spsr(registers r) {
-    uint32_t value=0;
-    return value;
+    return r->spsr;
 }
 
 void write_register(registers r, uint8_t reg, uint32_t value) {
+    if(reg == 00010000){
+    	r->cpsr=value;
+    } 
+    else if (reg==00010001){
+    	r->spsr=value;
+    }
+    r->registre[reg]=value;
 }
 
 void write_usr_register(registers r, uint8_t reg, uint32_t value) {
+	r->registre[reg]=value;
 }
 
 void write_cpsr(registers r, uint32_t value) {
+	r->cpsr=value;
 }
 
 void write_spsr(registers r, uint32_t value) {
+	r->spsr=value;
 }
