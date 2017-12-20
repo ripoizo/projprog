@@ -228,3 +228,119 @@ void arm_print_state(arm_core p, FILE *out) {
         }
     }
 }
+int verif_cond(arm_core p, uint32_t ins){
+	int a=0,b=0,c=0,d=0,exec=0;
+	uint32_t cpsr;
+	cpsr=read_cpsr((*p).reg);
+	a=get_bit(ins, 31);
+	b=get_bit(ins, 30);
+	c=get_bit(ins, 29);
+	d=get_bit(ins, 28);
+		
+	if(a){
+		if(b){
+			if(c){
+				if(d){
+					/*code ob1111 : on sait pas quoi faire*/
+				}else{
+					/*1110 Al : toujours*/
+					exec=1;
+				}
+			}else{
+				if(d){
+					/*1101 LE : Z set, N != V*/
+					if( (get_bit(cpsr, 28)!=get_bit(cpsr, 31)) && get_bit(cpsr, 30) ){
+						exec=1;
+					}
+				}else{
+					/*1100 GT : Z clear, N == V*/
+					if( (get_bit(cpsr, 28)==get_bit(cpsr, 31)) && !get_bit(cpsr, 30) ){
+						exec=1;
+					}
+				}
+			}
+		}else{
+			if(c){
+				if(d){
+					/*1011 LT : N != V*/
+					if( get_bit(cpsr, 28)!=get_bit(cpsr, 31) ){
+						exec=1;
+					}
+				}else{
+					/*1010 GE : N == V*/
+					if( get_bit(cpsr, 28)==get_bit(cpsr, 31) ){
+						exec=1;
+					}
+				}
+			}else{
+				if(d){
+					/*1001 LS : C clear et Z set*/
+					if( !get_bit(cpsr, 29) && get_bit(cpsr, 30) ){
+						exec=1;
+					}
+				}else{
+					/*1000 HI : C set et Z clear*/	
+					if( get_bit(cpsr, 29) && !get_bit(cpsr, 30) ){
+						exec=1;
+					}
+				}
+			}
+		}
+	}else{
+		if(b){
+			if(c){
+				if(d){
+					/*0111 VC : V clear*/
+					if( !get_bit(cpsr,28) ){
+						exec=1;
+					}
+				}else{
+					/*0110 VS : V set*/
+					if( get_bit(cpsr, 28) ){
+						exec=1;
+					}
+				}
+			}else{
+				if(d){
+					/*0101 PL : N clear*/
+					if( !get_bit(cpsr, 31)){
+						exec=1;
+					}
+				}else{
+					/*0100 MI : N set*/
+					if( get_bit(cpsr, 31) ){
+						exec=1;
+					}
+				}
+			}
+		}else{
+			if(c){
+				if(d){
+					/*0011 CC/LO : C clear*/
+					if( !get_bit(cpsr, 29) ){
+						exec=1;
+					}
+				}else{
+					/*0010 CS/HS : C set*/
+					if( get_bit(cpsr, 29) ){
+						exec=1;
+					}
+				}
+			}else{
+				if(d){
+					/*0001 NE : Z clear*/
+					if( !get_bit(cpsr, 30) ){
+						exec=1;
+					}
+				}else{
+					/*0000 EQ : Z set*/
+					if( get_bit(cpsr, 30) ){
+						exec=1;
+					}
+				}
+			}
+		}
+	}
+	return exec;
+}
+
