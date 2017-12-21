@@ -23,13 +23,34 @@ Contact: Guillaume.Huard@imag.fr
 #include "arm_branch_other.h"
 #include "arm_constants.h"
 #include "util.h"
+#include "registers.h"
 #include <debug.h>
 #include <stdlib.h>
-
+/*pc = r15*/
 
 int arm_branch(arm_core p, uint32_t ins) {
-    return UNDEFINED_INSTRUCTION;
+	uint32_t address=0, mask=0x00FFFFFF;
+	/*si BL*/
+	if(get_bit(ins, 24)){
+		/*On sauvegarde PC dans r14*/
+		arm_write_register( p, 14,  arm_read_register(p,15) );
+	}
+	
+	address= address | get_bits(ins, 23, 0);
+	/*On tente de sign extending*/
+	if(get_bit(ins, 23)){
+		address=address|(~mask);
+	}else{
+		address=address&(mask);
+	}
+	address=address<<2;	
+	/*On met l'addresse dans PC (r15)*/
+	arm_write_register(p, 15, address);
+	
+	return 0;		
 }
+
+
 
 int arm_coprocessor_others_swi(arm_core p, uint32_t ins) {
     if (get_bit(ins, 24)) {
@@ -44,3 +65,19 @@ int arm_coprocessor_others_swi(arm_core p, uint32_t ins) {
 int arm_miscellaneous(arm_core p, uint32_t ins) {
     return UNDEFINED_INSTRUCTION;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

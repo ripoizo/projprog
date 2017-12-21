@@ -228,3 +228,4 @@ void arm_print_state(arm_core p, FILE *out) {
         }
     }
 }
+
