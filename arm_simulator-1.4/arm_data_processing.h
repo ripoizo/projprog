@@ -46,5 +46,6 @@ int ins_BIC(arm_core p, uint32_t ins,uint32_t Rn,uint32_t Rd,uint32_t shifter_op
 void ins_MVN(arm_core p, uint32_t ins,uint32_t Rn,uint32_t Rd,uint32_t shifter_operand,uint64_t *carry);
 
 void put_flag(uint32_t cpsr,uint32_t Rd,uint64_t *carry, int typeflags);
+uint32_t find_shifter_operand(arm_core p, uint32_t ins, uint32_t *shifter_carry_out);
 
 #endif

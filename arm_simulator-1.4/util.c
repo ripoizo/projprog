@@ -23,6 +23,12 @@ Contact: Guillaume.Huard@imag.fr
 #include "util.h"
 
 /* We implement asr because shifting a signed is non portable in ANSI C */
+uint32_t lsr(uint32_t value, uint8_t shift){
+	return (value >> shift);
+}
+uint32_t lsl(uint32_t value, uint8_t shift){
+	return (value << shift);
+}
 uint32_t asr(uint32_t value, uint8_t shift) {
     return (value >> shift) | (get_bit(value, 31) ? ~0<<(32-shift) : 0);
 }

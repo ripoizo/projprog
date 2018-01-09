@@ -41,72 +41,72 @@ static int arm_execute_instruction(arm_core p) {
     cond = arm_fetch(p, &value);
 
     switch(get_bits(cond,31,28)){
-    	case 0000:
+    	case 0b0000:
     			if(!get_bit(cpsr,Z)){
     				return 0;
     			}
     	break;
-    	case 0001:
+    	case 0b0001:
     	    	if(get_bit(cpsr,Z)){
     				return 0;
     			}
     	break;
-    	case 0010:
+    	case 0b0010:
     			if(!get_bit(cpsr,C)){
     				return 0;
     			}
     	break;
-    	case 0011:
+    	case 0b0011:
     			if(get_bit(cpsr,C)){
     				return 0;
     			}
     	break;
-    	case 0100:
+    	case 0b0100:
     			if(!get_bit(cpsr,N)){
     				return 0;
     			}
     	break;
-    	case 0101:
+    	case 0b0101:
     			if(get_bit(cpsr,N)){
     				return 0;
     			}
     	break;
-    	case 0110:
+    	case 0b0110:
     			if(!get_bit(cpsr,V)){
     				return 0;
     			} 
     	break;
-    	case 0111:
+    	case 0b0111:
     			if(get_bit(cpsr,V)){
     				return 0;
     			}
     	break;
-    	case 1000:
+    	case 0b1000:
     			if(!get_bit(cpsr,C) || get_bit(cpsr,Z)){
     				return 0;
     			}
     	break;
-    	case 1001:
+    	case 0b1001:
     			if(get_bit(cpsr,C) || !get_bit(cpsr,Z)){
     				return 0;
     			}
     	break;
-    	case 1010:
+    	case 0b1010:
     			if(get_bit(cpsr,N) != get_bit(cpsr,V)){
     				return 0;
     			}
     	break;
-    	case 1011:
+    	case 0b1011:
     			if(get_bit(cpsr,N) == get_bit(cpsr,V)){
     				return 0;
     			}
     	break;
-    	case 1100:
+    	case 0b1100:
     			if(get_bit(cpsr,Z) || (get_bit(cpsr,N) != get_bit(cpsr,V))){
     				return 0;
     			}
     	break;
-    	case 1101:
+    	case 0b1101:
     			if(!get_bit(cpsr,Z) || (get_bit(cpsr,N) == get_bit(cpsr,V))){
     				return 0;
     			}
@@ -114,28 +114,28 @@ static int arm_execute_instruction(arm_core p) {
     }
 
     switch(get_bits(cpsr,27,25)){ //décodage de l'instruction
-    	case 000:
+    	case 0b000:
     		return arm_data_processing_shift(p,cond);
     	break;
-    	case 001:
+    	case 0b001:
     		return arm_data_processing_immediate_msr(p,cond);
     	break;
-    	case 010:
+    	case 0b010:
     		return arm_load_store(p,cond); //voir prof
     	break;
-    	case 011:
+    	case 0b011:
     		return arm_load_store(p,cond); //voir prof
     	break;
-    	case 100:
+    	case 0b100:
     		return arm_load_store_multiple(p,cond);
     	break;
-    	case 101:
+    	case 0b101:
     		return arm_branch(p,cond);
     	break;
-    	case 110:
+    	case 0b110:
     		return arm_coprocessor_load_store(p,cond);
     	break;
-    	case 111:
+    	case 0b111:
     		return arm_coprocessor_others_swi(p,cond);
     	break;
     }
