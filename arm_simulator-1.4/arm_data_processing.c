@@ -84,7 +84,8 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
             ins_ORR(p,ins,Rn, Rd, shifter_operand,carry);
         break;
         case 1101:
-            return ins_MOV(p,ins,Rn, Rd, shifter_operand,carry);
+        	typeflags = 0;
+            ins_MOV(p,ins, Rd, shifter_operand,carry);
         break;
         case 1110:
             return ins_BIC(p,ins,Rn, Rd, shifter_operand,carry);
@@ -159,7 +160,8 @@ int arm_data_processing_immediate_msr(arm_core p, uint32_t ins) {
             ins_ORR(p,ins,Rn, Rd, shifter_operand,carry);
         break;
         case 1101:
-            return ins_MOV(p,ins,Rn, Rd, shifter_operand,carry);
+        	typeflags = 0;
+            ins_MOV(p,ins, Rd, shifter_operand,carry);
         break;
         case 1110:
             return ins_BIC(p,ins,Rn, Rd, shifter_operand,carry);
@@ -251,8 +253,9 @@ void ins_ORR(arm_core p, uint32_t ins,uint32_t Rn,uint32_t Rd,uint32_t shifter_o
     *carry = shifter_operand | Rn;
 }
 
-int ins_MOV(arm_core p, uint32_t ins,uint32_t Rn,uint32_t Rd,uint32_t shifter_operand,uint64_t *carry){
-	return UNDEFINED_INSTRUCTION;
+void ins_MOV(arm_core p, uint32_t ins, uint32_t Rd, uint32_t shifter_operand, uint64_t *carry){
+	arm_write_register(p, Rd, shifter_operand);
+    *carry = shifter_operand;
 }
 
 int ins_BIC(arm_core p, uint32_t ins,uint32_t Rn,uint32_t Rd,uint32_t shifter_operand,uint64_t *carry){
