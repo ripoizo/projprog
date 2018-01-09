@@ -29,13 +29,14 @@ Contact: Guillaume.Huard@imag.fr
 
 int arm_data_processing_shift(arm_core p, uint32_t ins) {
 
-    uint32_t Rn, Rd, shifter_operand, cpsr;
+    uint32_t Rn, Rd, shifter_operand, cpsr, spsr;
     uint64_t * carry=0;
     int typeflags;
     Rn = arm_read_register(p,get_bits(ins, 19, 16));
     Rd = get_bits(ins, 16, 12);
     shifter_operand = arm_read_register(p,get_bits(ins, 3, 0));
     cpsr = arm_read_cpsr(p);
+    spsr = arm_read_spsr(p);
 
     switch(get_bits(ins,24,21)){
         case 0000:
@@ -91,10 +92,18 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
             return ins_BIC(p,ins,Rn, Rd, shifter_operand,carry);
         break;
         case 1111:
-            return ins_MVN(p,ins,Rn, Rd, shifter_operand,carry);
+        	typeflags = 0;
+            ins_MVN(p,ins,Rn, Rd, shifter_operand,carry);
         break;
     }
-
+    if(get_bit(ins, 20) && Rd==1111){
+    	if(arm_current_mode_has_spsr(p)){
+    		cpsr = spsr;
+    	}
+    	else{
+    		return UNPREDICTABLE;
+    	}
+    }
     if(get_bit(ins, 20)){                              
         put_flag (cpsr,Rd,carry,typeflags);
         arm_write_cpsr(p, cpsr);  
@@ -104,7 +113,7 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 
 
 int arm_data_processing_immediate_msr(arm_core p, uint32_t ins) {
-    uint32_t Rn, Rd, shifter_operand, cpsr;
+    uint32_t Rn, Rd, shifter_operand, cpsr, spsr;
     uint64_t * carry=0;
     int typeflags;
     Rn = arm_read_register(p,get_bits(ins, 19, 16));
@@ -112,6 +121,7 @@ int arm_data_processing_immediate_msr(arm_core p, uint32_t ins) {
     shifter_operand = get_bits(ins,7,0);
     shifter_operand = ror(shifter_operand,get_bits(ins,11,8)*2);
     cpsr = arm_read_cpsr(p);
+    spsr = arm_read_spsr(p);
 
     switch(get_bits(ins,24,21)){
         case 0000:
@@ -167,10 +177,20 @@ int arm_data_processing_immediate_msr(arm_core p, uint32_t ins) {
             return ins_BIC(p,ins,Rn, Rd, shifter_operand,carry);
         break;
         case 1111:
-            return ins_MVN(p,ins,Rn, Rd, shifter_operand,carry);
+        	typeflags = 0;
+            ins_MVN(p,ins,Rn, Rd, shifter_operand,carry);
         break;
     }
 
+    if(get_bit(ins, 20) && Rd==1111){
+    	if(arm_current_mode_has_spsr(p)){
+    		cpsr = spsr;
+    	}
+    	else{
+    		return UNPREDICTABLE;
+    	}
+    }
+    
     if(get_bit(ins, 20)){                              
         put_flag (cpsr,Rd,carry,typeflags);
         arm_write_cpsr(p, cpsr);  
@@ -262,6 +282,7 @@ int ins_BIC(arm_core p, uint32_t ins,uint32_t Rn,uint32_t Rd,uint32_t shifter_op
 	return UNDEFINED_INSTRUCTION;
 }
 
-int ins_MVN(arm_core p, uint32_t ins,uint32_t Rn,uint32_t Rd,uint32_t shifter_operand,uint64_t *carry){
-	return UNDEFINED_INSTRUCTION;
+void ins_MVN(arm_core p, uint32_t ins,uint32_t Rn,uint32_t Rd,uint32_t shifter_operand,uint64_t *carry){
+	arm_write_register(p, Rd, ~shifter_operand);
+    *carry = ~shifter_operand;	
 }
