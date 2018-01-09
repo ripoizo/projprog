@@ -28,38 +28,30 @@ Contact: Guillaume.Huard@imag.fr
 struct registers_data {
 	uint32_t cpsr; //registre 16
 	uint32_t spsr; //registre 17
-	uint32_t registre[16]; //registres 0 à 15
+	uint32_t *registre; //registres 0 à 15
+	uint8_t mode;
 };
 
 registers registers_create() {
     registers r;
-    r = malloc(sizeof(registers));
+    r = malloc(sizeof(struct registers_data));
+    (*r).registre=(uint32_t *) malloc(sizeof(uint32_t)*16);
+    r->mode=USR;
     return r;
+
 }
 
 void registers_destroy(registers r) {
+	free((*r).registre);
 	free(r);
 }
 
 uint8_t get_mode(registers r) {
-	uint8_t mode,m;
-	int i;
-	for(i=0; i<7; i++){
-		if(i>4){
-			m=get_bit(r->cpsr,i+4);
-		}
-		else{
-			m=get_bit(r->cpsr,i);
-		}
-		mode=set_bit(m,i);
-	}
-    return mode;
+    return r->mode;
 } 
 
 int current_mode_has_spsr(registers r) {
-	uint8_t mode;
-	mode=get_mode(r);
-	if(mode==00010000||mode==00011111){
+	if(get_mode(r)==USR||get_mode(r)==SYS){
 		return 1;
 	}
     return 0;
@@ -68,24 +60,19 @@ int current_mode_has_spsr(registers r) {
 int in_a_privileged_mode(registers r) {
 	uint8_t mode;
 	mode = get_mode(r);
-	if(mode==00010000){
+	if(mode==USR){
 		return 1;
 	}
     return 0;
 }
 
 uint32_t read_register(registers r, uint8_t reg) {
-    if(reg == 00010000){
-    	return r->cpsr;
-    } 
-    else if (reg==00010001){
-    	return r->spsr;
-    }
-    return r->registre[reg];
+
+    return (*r).registre[reg];
 }
 
 uint32_t read_usr_register(registers r, uint8_t reg) {
-    return r->registre[reg];
+    return (*r).registre[reg];
 }
 
 uint32_t read_cpsr(registers r) {
@@ -97,17 +84,12 @@ uint32_t read_spsr(registers r) {
 }
 
 void write_register(registers r, uint8_t reg, uint32_t value) {
-    if(reg == 00010000){
-    	r->cpsr=value;
-    } 
-    else if (reg==00010001){
-    	r->spsr=value;
-    }
-    r->registre[reg]=value;
+  
+    (*r).registre[reg]=value;
 }
 
 void write_usr_register(registers r, uint8_t reg, uint32_t value) {
-	r->registre[reg]=value;
+	(*r).registre[reg]=value;
 }
 
 void write_cpsr(registers r, uint32_t value) {
