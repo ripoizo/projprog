@@ -36,11 +36,10 @@ Contact: Guillaume.Huard@imag.fr
 static int arm_execute_instruction(arm_core p) {
     uint32_t value;
     uint32_t cpsr;
-    int cond;
     cpsr = arm_read_cpsr(p);
-    cond = arm_fetch(p, &value);
+    arm_fetch(p, &value);
 
-    switch(get_bits(cond,31,28)){
+    switch(get_bits(value,31,28)){
     	case 0b0000:
     			if(!get_bit(cpsr,Z)){
     				return 0;
@@ -115,28 +114,28 @@ static int arm_execute_instruction(arm_core p) {
 
     switch(get_bits(cpsr,27,25)){ //décodage de l'instruction
     	case 0b000:
-    		return arm_data_processing_shift(p,cond);
+    		return arm_data_processing_shift(p,value);
     	break;
     	case 0b001:
-    		return arm_data_processing_immediate_msr(p,cond);
+    		return arm_data_processing_immediate_msr(p,value);
     	break;
     	case 0b010:
-    		return arm_load_store(p,cond); //voir prof
+    		return arm_load_store(p,value); //voir prof
     	break;
     	case 0b011:
-    		return arm_load_store(p,cond); //voir prof
+    		return arm_load_store(p,value); //voir prof
     	break;
     	case 0b100:
-    		return arm_load_store_multiple(p,cond);
+    		return arm_load_store_multiple(p,value);
     	break;
     	case 0b101:
-    		return arm_branch(p,cond);
+    		return arm_branch(p,value);
     	break;
     	case 0b110:
-    		return arm_coprocessor_load_store(p,cond);
+    		return arm_coprocessor_load_store(p,value);
     	break;
     	case 0b111:
-    		return arm_coprocessor_others_swi(p,cond);
+    		return arm_coprocessor_others_swi(p,value);
     	break;
     }
     return 0;
